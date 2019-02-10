@@ -1,0 +1,79 @@
+<!DOCUMENTTYPE html>
+<html>
+  <head>
+    <style>
+      .video-select-area {display:block;margin:10px;}
+      .player-area {margin:10px;}
+    </style>
+  </head>
+  <body>
+
+    <div class='video-select-area'>
+      VideoID:
+      <input type='text' id='videoId'></input>
+      <button id='load-button' onclick='queueVideo();'>LOAD</button>
+      <input type='checkbox' id='loop' onchange='switchLoop();'></input>
+      <label for='loop'>LOOP</label>
+    </div>
+
+  <body>
+    <div class='player-area'>
+      <div id='player'></div>
+    </div>
+
+    <script>
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      var player;
+      var playerReady=false;
+      var loop = false;
+
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '360',
+          width: '640',
+          playerVars: {'rel':1 }, // 再生後の関連動画表示オフ
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
+
+      function onPlayerReady(event) {
+         playerReady=true;
+      }
+
+      function onPlayerStateChange(event) {
+        if(event.data == YT.PlayerState.ENDED && loop) {
+          player.playVideo();
+        }
+      }
+
+      function queueVideo() {
+        if(playerReady) {
+          var videoId = document.getElementById('videoId').value;
+          player.cueVideoById(videoId, 0,"default");
+
+          // player.setLoop()でループする場合はプレイリストを用いる。
+          // player.cuePlaylist(videoId);
+        }
+      }
+
+      function switchLoop() {
+        var checked = document.getElementById('loop').checked;
+        if(playerReady) {
+          loop = checked;
+          // setLoopでプレイリストをループするとループの度に再読込が発生する。
+          // player.setLoop(select);
+
+        } else {
+          document.getElementById('loop').checked = !checked;
+        }
+      }
+      
+    </script>
